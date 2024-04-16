@@ -2,101 +2,144 @@ import * as React from "react";
 import { Text, StyleSheet, View, Button, TextInput } from "react-native";
 import { Image } from "expo-image";
 import { Color, FontFamily, FontSize, Border } from "../../GlobalStyles";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { firebase } from '../../firebaseConfig'
 
 const Committeeheadaddtask = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { committeedata } = route.params;
+  console.log(committeedata, "dddddddd")
+  const [taskData, setTaskData] = React.useState({
+    taskname: "",
+    duedate: "",
+    description: "",
+    assignedto: "",
+  });
+
+  const handleInputChange = (name, value) => {
+    setTaskData({
+      ...taskData,
+      [name]: value
+    });
+  };
+
+  const addTaskToCommittee = async () => {
+    try {
+        const db = firebase.firestore();
+        const festRef = db.collection('festData');
+
+        // Get the document snapshot
+        const docSnapshot = await festRef.get();
+
+        // Iterate through the documents
+        docSnapshot.forEach(doc => {
+            const committees = doc.data().committees;
+
+            if (committees && committees.length > 0) {
+                // Iterate through the events array
+                committees.forEach(committee => {
+                    // Check if the event has email and code properties
+                    if (committee.email === committeedata.email && committee.code === committeedata.committeecode) {
+                        const committeeId = doc.id;
+                        const updatedTasks = committee.tasks ? [...committee.tasks, { ...taskData, status: 'pending' }] : [{ ...taskData, status: 'pending' }]
+                        
+                        // Update the specific event with the new tasks array
+                        festRef.doc(committeeId).update({
+                            'committees': committees.map(e => {
+                                if (e.email === committeedata.email && e.code === committeedata.committeecode) {
+                                    return { ...e, tasks: updatedTasks };
+                                }
+                                return e;
+                            })
+                        });
+
+                        console.log('Task added successfully for event:', committeeId);
+                    }
+                });
+            }
+        });
+    } catch (error) {
+        console.error('Error adding tasks:', error);
+    }
+};
+
+
   return (
-    <View style={styles.committeeheadaddtask}>
-      <Text style={styles.addTask}>Add Task</Text>
+    <View style={styles.organizereventeaddtask}>
+      <Text style={styles.assignTask}>Assign Task</Text>
       <Image
         style={styles.tasklistIcon}
         contentFit="cover"
         source={require("../../assets/Tasklist-1.png")}
       />
+      <View style={[styles.adminloginChild, styles.rectangleViewShadowBox]}>
+        <Text style={[styles.eventOrganizer]}>Assign Task</Text>
+        <View style={styles.field}>
 
-<View style={[styles.adminloginChild, styles.rectangleViewShadowBox]}>
-      <Text style={[styles.eventOrganizer]}>Assign Task</Text>
-        <View style={styles.field}>
-     
-            <TextInput
-          style={[styles.inputField, styles.usernameInput]}
-          placeholder="Task Name "
-          placeholderTextColor="#c9c9c9" 
-        />
+          <TextInput
+            style={[styles.inputField, styles.usernameInput]}
+            placeholder="Task Name "
+            placeholderTextColor="#c9c9c9"
+            value={taskData.taskname}
+            onChangeText={(text) => handleInputChange('taskname', text)}
+          />
         </View>
         <View style={styles.field}>
-            <TextInput
-          style={[styles.inputField, styles.passwordInput]}
-          placeholder="Due Date"
-          placeholderTextColor="#c9c9c9"
-          secureTextEntry
-        />
+          <TextInput
+            style={[styles.inputField, styles.passwordInput]}
+            placeholder="Due Date"
+            placeholderTextColor="#c9c9c9"
+            secureTextEntry
+            value={taskData.duedate}
+            onChangeText={(text) => handleInputChange('duedate', text)}
+          />
         </View>
         <View style={styles.field}>
-            <TextInput
-          style={[styles.inputField1, styles.passwordInput]}
-          placeholder="Description"
-          placeholderTextColor="#c9c9c9"
-          multiline
-          secureTextEntry
-        />
+          <TextInput
+            style={[styles.inputField1, styles.passwordInput]}
+            placeholder="Description"
+            placeholderTextColor="#c9c9c9"
+            multiline
+            secureTextEntry
+            value={taskData.description}
+            onChangeText={(text) => handleInputChange('description', text)}
+          />
         </View>
         <View style={styles.field}>
-            <TextInput
-          style={[styles.inputField, styles.passwordInput]}
-          placeholder="Assigned To"
-          placeholderTextColor="#c9c9c9"
-          secureTextEntry
-        />
+          <TextInput
+            style={[styles.inputField, styles.passwordInput]}
+            placeholder="Assigned To"
+            placeholderTextColor="#c9c9c9"
+            secureTextEntry
+            value={taskData.assignedto}
+            onChangeText={(text) => handleInputChange('assignedto', text)}
+          />
         </View>
-        
-        
+
+
         <View style={[styles.buttonContainer]}>
-        <Button  title="Submit" color="#000080" style={styles.btn}>
-          {/* <Text style={styles.loginButtonText}>Login</Text> */}
-        </Button>
-        {/* <TouchableOpacity style={[styles.loginButton, styles.rectangleViewShadowBox]} onPress={handleLogin}>
+          <Button title="Submit" color="#000080" style={styles.btn} onPress={addTaskToCommittee}>
+            {/* <Text style={styles.loginButtonText}>Login</Text> */}
+          </Button>
+          {/* <TouchableOpacity style={[styles.loginButton, styles.rectangleViewShadowBox]} onPress={handleLogin}>
         </TouchableOpacity> */}
         </View>
-        
+
       </View>
-     
-    
-      
-     
-      
-      
+
+
+
+
+
+
+
+
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  
-  addTask: {
-    top: 45,
-    fontSize: FontSize.size_17xl,
-    width: 274,
-    height: 54,
-    textAlign: "left",
-    color: Color.colorWhite,
-    fontFamily: FontFamily.irishGroverRegular,
-    left: 29,
-    position: "absolute",
-  },
-  tasklistIcon: {
-    top: 30,
-    left: 260,
-    width: 86,
-    height: 69,
-    position: "absolute",
-  },
-  
-  committeeheadaddtask: {
-    flex: 1,
-    width: "100%",
-    height: 862,
-    overflow: "hidden",
-    backgroundColor: Color.colorDarkslateblue_200,
-  },
   rectangleViewShadowBox: {
     borderWidth: 1,
     borderColor: Color.colorBlack,
@@ -111,20 +154,20 @@ const styles = StyleSheet.create({
     shadowColor: "rgba(0, 0, 0, 0.25)",
     borderRadius: Border.br_6xl,
     position: "absolute",
-    paddingTop:100
+    paddingTop: 100
   },
-  
+
   adminloginPosition: {
     width: 221,
     left: 90,
     position: "absolute",
   },
-  inputField1:{
+  inputField1: {
     height: 80,
     borderRadius: Border.br_6xl,
     paddingHorizontal: 10,
     marginBottom: 15,
-    top:40,
+    top: 40,
   },
   loginTypo: {
     height: 75,
@@ -134,13 +177,13 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.itimRegular,
     position: "absolute",
   },
-  eventOrganizer:{
+  eventOrganizer: {
     width: 204,
     left: 88,
     top: -50,
-    color:"black",
-    fontWeight:900,
-    fontSize:25,
+    color: "black",
+    fontWeight: 900,
+    fontSize: 25,
   },
   adminloginChild: {
     top: 120,
@@ -177,16 +220,16 @@ const styles = StyleSheet.create({
     height: 48,
     top: 492,
   },
-  buttonContainer:{
-    display:"flex",
-    justifyContent:"center",
+  buttonContainer: {
+    display: "flex",
+    justifyContent: "center",
     width: 120,
     top: 28,
     left: 100,
   },
-  field:{
-backgroundColor:"#000080",
-margin:10
+  field: {
+    backgroundColor: "#000080",
+    margin: 10
   },
   username: {
     left: 111,
@@ -221,24 +264,24 @@ margin:10
     borderRadius: Border.br_6xl,
     paddingHorizontal: 10,
     marginBottom: 15,
-    top:40,
+    top: 40,
   },
   usernameInput: {
     top: 8,
-    color:Color.colorWhite,
-    placeholderTextColor:Color.colorWhitesmoke
-    
+    color: Color.colorWhite,
+    placeholderTextColor: Color.colorWhitesmoke
+
   },
   passwordInput: {
     top: 8,
-    color:Color.colorWhite,
+    color: Color.colorWhite,
   },
   loginButton: {
     backgroundColor: Color.colorDarkslateblue_400,
     width: 155,
     height: 20,
     top: 986,
-    margin:"auto",
+    margin: "auto",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -246,18 +289,18 @@ margin:10
     color: "#000080",
     fontSize: FontSize.size_17xl,
     fontFamily: FontFamily.itimRegular,
-    height:100,
+    height: 100,
   },
- 
+
   addcommitteform: {
     width: 393,
     height: 852,
     overflow: "hidden",
     backgroundColor: Color.colorDarkslateblue_200,
   },
-  btn:{
-    width:70,
-    left:100,
+  btn: {
+    width: 70,
+    left: 100,
   },
   organizereventeaddtaskShadowBox: {
     borderWidth: 1,
@@ -394,6 +437,12 @@ margin:10
     fontFamily: FontFamily.irishGroverRegular,
     position: "absolute",
   },
+  organizereventeaddtask: {
+    flex: 1,
+    width: "100%",
+    height: 852,
+    overflow: "hidden",
+    backgroundColor: Color.colorDarkslateblue_200,
+  },
 });
-
 export default Committeeheadaddtask;

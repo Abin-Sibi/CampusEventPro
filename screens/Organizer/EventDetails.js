@@ -25,17 +25,19 @@ const EventDetails = () => {
             const filteredEvent = eventsData.find(event => event.eventname === events.eventname);
 
             if (filteredEvent) {
-                const totalTasks = filteredEvent.tasks.length;
+              const totalTasks = filteredEvent.tasks ? filteredEvent.tasks.length : 0;
                 let completedTasks = 0;
 
-                // Count completed tasks
-                filteredEvent.tasks.forEach(task => {
-                    if (task.status === 'completed') {
-                        completedTasks++;
-                    }
-                });
+                if (filteredEvent.tasks) {
+                  // Iterate over tasks
+                  filteredEvent.tasks.forEach(task => {
+                      if (task.status === 'completed') {
+                          completedTasks++;
+                      }
+                  });
+              }
 
-                const percentage = Math.round((completedTasks / totalTasks) * 100);
+              const percentage = totalTasks === 0 ? 100 : Math.round((completedTasks / totalTasks) * 100);
 
                 console.log('Total number of tasks:', totalTasks);
                 console.log('Completed tasks:', completedTasks);

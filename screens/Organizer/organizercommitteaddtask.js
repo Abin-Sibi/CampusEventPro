@@ -2,17 +2,89 @@ import * as React from "react";
 import { Text, StyleSheet, View, Button, TextInput } from "react-native";
 import { Image } from "expo-image";
 import { Color, FontFamily, FontSize, Border } from "../../GlobalStyles";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import {firebase} from '../../firebaseConfig'
 
 const Organizercommitteaddtask = () => {
+  const navigation = useNavigation();
+    const route = useRoute();
+  const { committees } = route.params;
+  console.log(committees,"hdakjhkjdfhlakjd")
+
+  const [taskData, setTaskData] = React.useState({
+    taskname: "",
+    duedate: "",
+    description: "",
+    assignedto: "",
+  });
+
+  const handleInputChange = (name, value) => {
+    setTaskData({
+      ...taskData,
+      [name]: value
+    });
+  };
+
+  const addTaskToCommittee = async () => {
+    try {
+        const db = firebase.firestore();
+        const festRef = db.collection('festData').doc(committees.id);
+
+        // Get the document snapshot
+        const docSnapshot = await festRef.get();
+
+        if (docSnapshot.exists) {
+            // Extract the data from the document
+            const festData = docSnapshot.data();
+
+            // Check if the document contains events
+            if (festData.events) {
+                // Find the event object by unique name key
+                const committeeIndex = festData.committees.findIndex(committee => committee.committeename === committees.committeename);
+
+                if (committeeIndex !== -1) {
+                    // Initialize tasks array if it doesn't exist
+                    if (!festData.committees[committeeIndex].tasks) {
+                        festData.committees[committeeIndex].tasks = [];
+                    }
+
+                    // Add the task with the status 'pending' to the tasks array
+                    const newTask = {
+                        ...taskData,
+                        status: 'pending'
+                    };
+
+                    festData.committees[committeeIndex].tasks.push(newTask);
+
+                    // Update the document in Firestore
+                    await festRef.update({
+                      committees: festData.committees,
+                    });
+
+                    console.log('Task added successfully.');
+                } else {
+                    console.log('Event not found.');
+                }
+            } else {
+                console.log('No events found in the document.');
+            }
+        } else {
+            console.log('Document not found.');
+        }
+    } catch (error) {
+        console.error('Error adding task to event:', error);
+    }
+};
+
   return (
-    <View style={styles.organizercommitteaddtask}>
+    <View style={styles.organizereventeaddtask}>
       <Text style={styles.assignTask}>Assign Task</Text>
       <Image
         style={styles.tasklistIcon}
         contentFit="cover"
         source={require("../../assets/Tasklist-1.png")}
       />
-      <View style={[styles.adminloginChild, styles.rectangleViewShadowBox]}>
+     <View style={[styles.adminloginChild, styles.rectangleViewShadowBox]}>
       <Text style={[styles.eventOrganizer]}>Assign Task</Text>
         <View style={styles.field}>
      
@@ -20,6 +92,8 @@ const Organizercommitteaddtask = () => {
           style={[styles.inputField, styles.usernameInput]}
           placeholder="Task Name "
           placeholderTextColor="#c9c9c9" 
+          value={taskData.taskname}
+          onChangeText={(text) => handleInputChange('taskname', text)}
         />
         </View>
         <View style={styles.field}>
@@ -28,6 +102,8 @@ const Organizercommitteaddtask = () => {
           placeholder="Due Date"
           placeholderTextColor="#c9c9c9"
           secureTextEntry
+          value={taskData.duedate}
+          onChangeText={(text) => handleInputChange('duedate', text)}
         />
         </View>
         <View style={styles.field}>
@@ -37,6 +113,8 @@ const Organizercommitteaddtask = () => {
           placeholderTextColor="#c9c9c9"
           multiline
           secureTextEntry
+          value={taskData.description}
+          onChangeText={(text) => handleInputChange('description', text)}
         />
         </View>
         <View style={styles.field}>
@@ -45,12 +123,14 @@ const Organizercommitteaddtask = () => {
           placeholder="Assigned To"
           placeholderTextColor="#c9c9c9"
           secureTextEntry
+          value={taskData.assignedto}
+          onChangeText={(text) => handleInputChange('assignedto', text)}
         />
         </View>
         
         
         <View style={[styles.buttonContainer]}>
-        <Button  title="Submit" color="#000080" style={styles.btn}>
+        <Button  title="Submit" color="#000080" style={styles.btn} onPress={addTaskToCommittee}>
           {/* <Text style={styles.loginButtonText}>Login</Text> */}
         </Button>
         {/* <TouchableOpacity style={[styles.loginButton, styles.rectangleViewShadowBox]} onPress={handleLogin}>
@@ -58,11 +138,10 @@ const Organizercommitteaddtask = () => {
         </View>
         
       </View>
+     
       
       
-      
-      
-      
+     
       
       
       
@@ -370,13 +449,6 @@ margin:10
     position: "absolute",
   },
   organizereventeaddtask: {
-    flex: 1,
-    width: "100%",
-    height: 852,
-    overflow: "hidden",
-    backgroundColor: Color.colorDarkslateblue_200,
-  },
-  organizercommitteaddtask: {
     flex: 1,
     width: "100%",
     height: 852,

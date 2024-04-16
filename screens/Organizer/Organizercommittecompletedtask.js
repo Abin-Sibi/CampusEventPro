@@ -2,107 +2,131 @@ import * as React from "react";
 import { Text, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import { Color, FontFamily, FontSize, Border } from "../../GlobalStyles";
+import { firebase } from '../../firebaseConfig'
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const Organizercommittecompletedtask = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { committees } = route.params;
+  console.log(route.params,"rrrr")
+  const [pendingTasks, setPendingTasks] = React.useState([]);
+
+  const fetchDataById = async () => {
+    try {
+      const db = firebase.firestore();
+      const documentRef = db.collection('festData').doc(committees.id);
+      const doc = await documentRef.get();
+      
+      if (doc.exists) {
+        // Document found, extract its data
+        const documentData = { id: doc.id, ...doc.data() };
+        console.log("Document data:", documentData);
+
+        if (documentData) {
+          // Find the event within the festival by event name
+          const committee = documentData.committees.find(committee => committee.committeename === committees.committeename);
+      
+          if (committee) {
+            // Filter the tasks of the event to get only pending tasks
+            const pendingTasks = committee.tasks.filter(task => task.status === "completed");
+            console.log("this it the pendihng taks",pendingTasks)
+            setPendingTasks(pendingTasks)
+          } else {
+            console.log("Event not found");
+            return [];
+          }
+        } else {
+          console.log("Festival not found");
+          return [];
+        }
+      } else {
+        console.log("Document not found");
+        return null;
+      }  
+    } catch (error) {
+      console.error("Error fetching document:", error);
+      return null;
+    }
+  };
+
+  React.useEffect(() => {
+      fetchDataById();
+  }, [])
   return (
-    <View style={styles.organizercommittecompletedtask}>
-      <Text style={styles.completedTasks}>Completed tasks</Text>
-      <View style={styles.organizercommittecompletedtaskChild} />
-      <View
-        style={[
-          styles.organizercommittecompletedtaskItem,
-          styles.organizercommittecompletedtaskShadowBox,
-        ]}
-      />
-      <View
-        style={[
-          styles.organizercommittecompletedtaskInner,
-          styles.organizercommittecompletedtaskShadowBox,
-        ]}
-      />
-      <Text style={[styles.taskNameDue, styles.taskTypo]}>{`Task Name:
-Due Date:
-Assigned To:
-Assigned By:
-Description:
-
-`}</Text>
-      <Text style={[styles.uploadedDocs, styles.uploadedTypo]}>
-        Uploaded docs
-      </Text>
+    <View style={styles.organizeeventependingtask}>
+      <Text style={styles.pendingTasks}>Pending tasks</Text>
+      <View style={styles.organizeeventependingtaskChild} >
+        {pendingTasks.map((task,index)=>{
+          return(<View key={index} style={styles.card}>
+            <View style={styles.content}>
+              <View style={styles.leftContent}>
+                <Text style={styles.taskName}>{task.taskname}</Text>
+                <Text style={styles.description}>{task.description}</Text>
+              </View>
+              <View style={styles.rightContent}>
+                <Text style={styles.status}>{task.status}</Text>
+                <Text style={styles.status}>{task.duedate}</Text>
+              </View>
+            </View>
+          </View>)
+          
+        })}
+      
+      </View>
+      
+      
       <Image
-        style={[styles.documentsIcon, styles.documentsIconLayout]}
+        style={styles.tasksIcon}
         contentFit="cover"
-        source={require("../../assets/Documents.png")}
+        source={require("../../assets/Tasks.png")}
       />
-      <Text style={[styles.taskNameDue1, styles.taskTypo]}>{`Task Name:
-Due Date:
-Assigned To:
-Assigned By:
-Description:
-
-`}</Text>
-      <Text style={[styles.uploadedDocs1, styles.uploadedTypo]}>
-        Uploaded docs
-      </Text>
-      <Image
-        style={[styles.documentsIcon1, styles.documentsIconLayout]}
-        contentFit="cover"
-        source={require("../../assets/Documents.png")}
-      />
-      <Image
-        style={styles.okIcon}
-        contentFit="cover"
-        source={require("../../assets/Ok.png")}
-      />
+      
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  organizercommittecompletedtaskShadowBox: {
-    height: 233,
-    width: 292,
-    backgroundColor: Color.colorDarkslateblue_400,
-    left: 51,
-    borderWidth: 1,
-    borderColor: Color.colorBlack,
-    borderStyle: "solid",
-    shadowOpacity: 1,
-    elevation: 4,
-    shadowRadius: 4,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowColor: "rgba(0, 0, 0, 0.25)",
-    position: "absolute",
+  card: {
+    backgroundColor: Color.colorDarkslateblue_100,
+    borderRadius: 8,
+    margin:20,
+    padding: 20,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  taskTypo: {
-    fontFamily: FontFamily.interRegular,
-    fontSize: FontSize.size_5xl,
-    left: 66,
-    textAlign: "left",
-    color: Color.colorWhite,
-    position: "absolute",
+  content: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    
   },
-  uploadedTypo: {
-    height: 48,
-    width: 185,
-    fontFamily: FontFamily.interRegular,
-    fontSize: FontSize.size_5xl,
-    left: 66,
-    textAlign: "left",
-    color: Color.colorWhite,
-    position: "absolute",
+  leftContent: {
+    flex: 1,
+    
   },
-  documentsIconLayout: {
-    height: 59,
-    width: 76,
-    left: 251,
-    position: "absolute",
+  rightContent: {
+    marginLeft: 10,
+    flexShrink: 0,
   },
-  completedTasks: {
+  taskName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color:Color.colorWhite
+  },
+  description: {
+    fontSize: 16,
+    color:Color.colorWhite
+  },
+  status: {
+    fontSize: 14,
+    color:Color.colorWhite
+  },
+  pendingTasks: {
     top: 45,
     fontSize: FontSize.size_13xl,
     fontFamily: FontFamily.irishGroverRegular,
@@ -113,7 +137,7 @@ const styles = StyleSheet.create({
     left: 29,
     position: "absolute",
   },
-  organizercommittecompletedtaskChild: {
+  organizeeventependingtaskChild: {
     top: 140,
     borderRadius: Border.br_9xl,
     backgroundColor: Color.colorWhite,
@@ -133,38 +157,14 @@ const styles = StyleSheet.create({
     left: 29,
     position: "absolute",
   },
-  organizercommittecompletedtaskItem: {
-    top: 465,
-  },
-  organizercommittecompletedtaskInner: {
-    top: 193,
-  },
-  taskNameDue: {
-    top: 208,
-  },
-  uploadedDocs: {
-    top: 359,
-  },
-  documentsIcon: {
-    top: 342,
-  },
-  taskNameDue1: {
-    top: 495,
-  },
-  uploadedDocs1: {
-    top: 646,
-  },
-  documentsIcon1: {
-    top: 629,
-  },
-  okIcon: {
-    top: 32,
-    left: 283,
-    width: 81,
-    height: 67,
+  tasksIcon: {
+    top: 34,
+    left: 282,
+    width: 77,
+    height: 75,
     position: "absolute",
   },
-  organizercommittecompletedtask: {
+  organizeeventependingtask: {
     backgroundColor: Color.colorDarkslateblue_200,
     flex: 1,
     width: "100%",
@@ -172,5 +172,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
 });
+
 
 export default Organizercommittecompletedtask;

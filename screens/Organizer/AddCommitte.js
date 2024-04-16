@@ -44,9 +44,9 @@ const AddCommitte = () => {
       <Text style={styles.eventsConnect}>Commitee Connect</Text>
           {data.committees && data.committees.map((committee, eventIndex) => (
             <View key={eventIndex} style={[styles.addeventChild, styles.addeventShadowBox]} >
-              <Text style={[styles.itManagerEvent, styles.itManagerEventTypo]}>{committee.eventname}</Text>
-              <Text style={[styles.itManagerEvent1, styles.itManagerEventTypo]}>{committee.eventheadname}</Text>
-              <TouchableOpacity onPress={() => { navigation.navigate('CommitteeDetails',{events:{id:id,eventname:committee.eventname}}) }}>
+              <Text style={[styles.itManagerEvent, styles.itManagerEventTypo]}>{committee.committeename}</Text>
+              <Text style={[styles.itManagerEvent1, styles.itManagerEventTypo]}>{committee.committeehead}</Text>
+              <TouchableOpacity onPress={() => { navigation.navigate('CommitteeDetails',{committees:{id:id,committeename:committee.committeename}}) }}>
                 <Image  
                   style={[styles.businessmanIcon, styles.iconLayout]}
                   contentFit="cover"

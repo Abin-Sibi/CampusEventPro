@@ -22,13 +22,13 @@ const Others = () => {
     console.log("herwrwe12344")
               switch (selectedOption) {
                 case 'Committeeheadpage':
-                  navigation.navigate('Committeeheadpage');
+                  CommitteeHeadLogin();
                   break;
                 case 'Eventtheadpage':
                   EventHeadLogin();
                   break;
                 case 'Committeememberspage':
-                  navigation.navigate('Committeememberspage');
+                 CommitteeMemberLogin();
                   break;
                 case 'Eventmemberspage':
                  EventMemberLogin();
@@ -37,6 +37,38 @@ const Others = () => {
                   break;
               }
   }
+
+  const CommitteeMemberLogin = async ()=>{
+    try {
+      const db = firebase.firestore();
+            const festRef = db.collection('festData');
+
+            // Get the document snapshot
+            const docSnapshot = await festRef.get();
+
+
+            // Iterate through the documents
+            docSnapshot.forEach(doc => {
+                const committees = doc.data().committees;
+
+                if (committees && committees.length > 0) {
+                  committees.forEach(committee => {
+                        if (committee.members && committee.members.length > 0 && committee.code === userCode) {
+                          committee.members.forEach(member => {
+                               if(member.email === username && member.password === password){
+                                navigation.navigate('Committeememberspage',{taskData:{email:member.email,code:userCode}});
+                               }
+                            });
+                        }
+                    });
+                }
+            });
+
+    } catch (error) {
+      console.error('Error logging in:', error);
+    }
+  }
+
 
   const EventMemberLogin = async ()=>{
     try {
@@ -92,19 +124,8 @@ const Others = () => {
             ) {
               // Perform navigation based on the selected option
               console.log("herwrwe12344")
-              switch (selectedOption) {
-                case 'Committeeheadpage':
-                  navigation.navigate('Committeeheadpage');
-                  break;
-                case 'Eventtheadpage':
                   navigation.navigate('Eventtheadpage',{eventdata:{eventcode:event.code,email:event.email}});
-                  break;
-                case 'Committeememberspage':
-                  navigation.navigate('Committeememberspage');
-                  break;
-                default:
-                  break;
-              }
+                
             }
           });
         }
@@ -113,6 +134,41 @@ const Others = () => {
       console.error('Error logging in:', error);
     }
   };
+
+  const CommitteeHeadLogin = async () => {
+    try {
+
+      const festRef = firebase.firestore().collection('festData');
+      const snapshot = await festRef.get();
+      console.log(snapshot.docs, "this is the docs");
+  
+      snapshot.forEach(doc => {
+        const committees = doc.data().committees;
+  
+        // Check if events array is defined
+        if (committees) {
+          // Check if the username, password, and user code match any event
+          committees.forEach(committee => {
+            console.log("herwrwe12344",committee.email,committee.password,committee.code,"woqqqq",username,password,userCode)
+            if (
+              committee.email === username &&
+              committee.password === password &&
+              committee.code === userCode
+              
+            ) {
+              // Perform navigation based on the selected option
+              console.log("herwrwe12344")
+                  navigation.navigate('Committeeheadpage',{committeedata:{committeecode:committee.code,email:committee.email}});
+                 
+            }
+          });
+        }
+      });
+    } catch (error) {
+      console.error('Error logging in:', error);
+    }
+  };
+
 
   return (
     <View style={styles.container}>

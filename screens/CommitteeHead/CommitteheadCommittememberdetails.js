@@ -2,14 +2,14 @@ import * as React from "react";
 import { Text, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import { Color, Border, FontFamily, FontSize } from "../../GlobalStyles";
-import { useRoute } from "@react-navigation/native";
 import { firebase } from '../../firebaseConfig';
+import { useRoute } from "@react-navigation/native";
 
-const Organizercommittememberslist = () => {
+const CommitteheadCommittememberdetails = () => {
   const [members, setMembers] = React.useState([]);
     const route = useRoute();
-  const { committees } = route.params;
-  console.log(committees)
+  const { committeedata } = route.params;
+  console.log(committeedata)
 
     const fetchMembers = async () => {
         try {
@@ -23,11 +23,11 @@ const Organizercommittememberslist = () => {
 
             // Iterate through the documents
             docSnapshot.forEach(doc => {
-                const committeedata = doc.data().committees;
+                const committees = doc.data().committees;
 
-                if (committeedata && committeedata.length > 0) {
-                  committeedata.forEach(committee => {
-                        if (committee.members && committee.members.length > 0 && committee.eventname === committees.eventname) {
+                if (committees && committees.length > 0) {
+                  committees.forEach(committee => {
+                        if (committee.members && committee.members.length > 0 && committee.code === committeedata.committeecode) {
                           committee.members.forEach(member => {
                                 membersData.push(member);
                             });
@@ -215,4 +215,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Organizercommittememberslist;
+export default CommitteheadCommittememberdetails;

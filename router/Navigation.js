@@ -19,7 +19,7 @@ import Organizereventnotification from '../screens/Organizer/Organizereventnotif
 import Organizereventeaddtask from '../screens/Organizer/Organizereventeaddtask';
 import Organizereventcompletedtask from '../screens/Organizer/Organizereventcompletedtask';
 import Organizeeventependingtask from '../screens/Organizer/Organizereventependingtask';
-import Organizereventmeberslist from '../screens/Organizer/Organizereventmeberslis';
+import Organizereventmeberslist from '../screens/Organizer/Organizereventmeberslist';
 import AddCommitte from '../screens/Organizer/AddCommitte';
 import AdminLogin from '../screens/PublicScreens/AdminLogin';
 import OrganizerCommitteeDetails from '../screens/Organizer/OrganizerCommitteeDetails';
@@ -32,15 +32,12 @@ import Committeeheadpage from '../screens/CommitteeHead/Committeeheadpage';
 import Committeeheadnotification from '../screens/CommitteeHead/Committeeheadnotification';
 import Committeeheadaddtask from '../screens/CommitteeHead/Committeeheadaddtask';
 import Committeheadteammembers from '../screens/CommitteeHead/Committeheadteammembers';
-import Committeheadcommittememberdeta from '../screens/CommitteeHead/Committeheadcommittememberde';
 import Committeeheadpendingtask from '../screens/CommitteeHead/Committeeheadpendingtask';
 import Committeeheadcompletedtask from '../screens/CommitteeHead/Committeeheadcompletedtask';
 import Committeememberspage from '../screens/CommitteeMembers/Committeememberspage';
 import Committeemembernotification from '../screens/CommitteeMembers/Committeemembernotification';
 import Committeememberpendingtask from '../screens/CommitteeMembers/Committeememberpendingtask';
 import Committeemembercompletedtask from '../screens/CommitteeMembers/Committeemembercompletedtask';
-import Committeemembergeneratereports from '../screens/CommitteeMembers/Committeemembergeneratereports';
-import CommitteemembersGeneratedRep from '../screens/CommitteeMembers/CommitteemembersGeneratedRep';
 import Committeemenbercontactdeatils from '../screens/CommitteeMembers/Committeemenbercontactdeatils';
 
 import Eventheadnotification from '../screens/EventHead/Eventheadnotification';
@@ -54,10 +51,10 @@ import Eventmemberspage from '../screens/EventMembers/Eventmemberspage';
 import Eventmembernotification from '../screens/EventMembers/Eventmembernotification';
 import Eventmemberpendingtask from '../screens/EventMembers/Eventmemberpendingtask';
 import Eventmembercompletedtask from '../screens/EventMembers/Eventmembercompletedtask';
-import Eventmembergeneratereports from '../screens/EventMembers/Eventmembergeneratereports';
-import EventmemberGeneratedReports from '../screens/EventMembers/EventmemberGeneratedReports';
 import Eventmenbercontactdeatils from '../screens/EventMembers/Eventmenbercontactdeatils';
 import Others from '../screens/PublicScreens/Others';
+import Organizercommittecompletedtask from '../screens/Organizer/Organizercommittecompletedtask';
+import CommitteheadCommittememberdetails from '../screens/CommitteeHead/CommitteheadCommittememberdetails';
 
 
 
@@ -94,7 +91,7 @@ function Navigation() {
             <Stack.Screen name="OrganizerCommitteeDetails" component={OrganizerCommitteeDetails} />
             <Stack.Screen name="Organizernotification" component={Organizernotification} />
             <Stack.Screen name="Organizercommitteaddtask" component={Organizercommitteaddtask} />
-            <Stack.Screen name="Organizercommittecompletedtask" component={Organizereventcompletedtask} />
+            <Stack.Screen name="Organizercommittecompletedtask" component={Organizercommittecompletedtask} />
             <Stack.Screen name="Organizercommittependingtask" component={Organizercommittependingtask} />
             <Stack.Screen name="Organizercommittememberslist" component={Organizercommittememberslist} />
 
@@ -103,7 +100,7 @@ function Navigation() {
             <Stack.Screen name="Committeeheadnotification" component={Committeeheadnotification} />
             <Stack.Screen name="Committeeheadaddtask" component={Committeeheadaddtask} />
             <Stack.Screen name="Committeheadteammembers" component={Committeheadteammembers} />
-            <Stack.Screen name="Committeheadcommittememberdeta" component={Committeheadcommittememberdeta} />
+            <Stack.Screen name="CommitteheadCommittememberdetails" component={CommitteheadCommittememberdetails} />
             <Stack.Screen name="Committeeheadpendingtask" component={Committeeheadpendingtask} />
             <Stack.Screen name="Committeeheadcompletedtask" component={Committeeheadcompletedtask} />
 
