@@ -62,7 +62,9 @@ React.useEffect(() => {
 
   return (
     <View style={styles.committeeDetails}>
-      <Text style={styles.committeeDetails1}>Committee Details</Text>
+      <Text style={[styles.itManager, styles.itManagerTypo]}>
+  {committees ? committees.committeename : "No committees available"}
+</Text>
       <Image
         style={styles.groupOfCompanies}
         contentFit="cover"
@@ -133,9 +135,9 @@ React.useEffect(() => {
       />
       <Text
         style={[styles.feb2024Sunday, styles.calendarIconPosition]}
-      >{`28   FEB 
+      >{`19   APR 
  2024
-Sunday`}</Text>
+Friday`}</Text>
       
       
      

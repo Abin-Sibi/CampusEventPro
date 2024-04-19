@@ -3,19 +3,49 @@ import { Image } from "expo-image";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { Color, FontFamily, FontSize, Border } from "../../GlobalStyles";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { firebase, storage } from '../../firebaseConfig';
 
 const FestDetails = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const {id} = route.params;
   console.log(id,"hwllooooaaee")
+  const [festData, setFestData] = React.useState(null);
+
+  const fetchFestData = async () => {
+    try {
+      const db = firebase.firestore();
+      const festRef = db.collection('festData').doc(id);
+      const doc = await festRef.get();
+      if (doc.exists) {
+        setFestData({ id: doc.id, ...doc.data() });
+        console.log(doc)
+      } else {
+        console.log('No fest found with the provided ID');
+      }
+    } catch (error) {
+      console.error('Error fetching fest data:', error);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchFestData();
+  }, [id]); // Fetch data when the ID changes
+
   return (
     <View style={styles.festDetails}>
-      <Image
-        style={styles.image2Icon}
-        contentFit="cover"
-        source={require("../../assets/image 2.png")}
-      />
+      {festData ? (
+      <>
+        <Text style={styles.head}>Welcome to {festData.festname}</Text>
+        <Image
+          style={styles.image2Icon}
+          contentFit="cover"
+          source={{ uri: festData.posterImage }}
+        />
+      </>
+    ) : (
+      <Text>Loading...</Text>
+    )}
       <View style={styles.festShadowBox} />
       <View style={styles.festShadowBox} />
       <View style={styles.rectangleViewShadowBox} />
@@ -49,9 +79,15 @@ const styles = StyleSheet.create({
     fontSize: FontSize.size_5xl,
     position: "absolute",
   },
+  head:{
+    top:50,
+    left:20,
+    fontSize: FontSize.size_5xl,
+    color:"white"
+  },
   image2Icon: {
     top: 119,
-    borderRadius: Border.br_22xl,
+    borderRadius: 10,
     width: 373,
     height: 383,
     left: 10,
@@ -98,11 +134,11 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   committe: {
-    top: 625,
+    top: 590,
     left: 267,
   },
   events: {
-    top: 624,
+    top: 590,
     left: 35,
   },
   userIcon: {

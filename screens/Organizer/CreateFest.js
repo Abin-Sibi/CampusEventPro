@@ -34,6 +34,7 @@ const CreateFest = () => {
       fetchedData.push({ id: doc.id, ...doc.data() });
     });
     setData(fetchedData);
+    
   };
 
   useEffect(() => {
@@ -180,29 +181,36 @@ const CreateFest = () => {
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.goodMorning}>Good Morning</Text>
         <View>
-          {data.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.createFestItem}
-              onLongPress={() => handleLongPress(item.id)} // Add long-press handler
-            >
-              <Text style={[styles.daysLeft, styles.daysTypo]}> 11 Days left</Text>
-              <Text style={[styles.interfaces, styles.gatewaysTypo]}>{JSON.stringify(item.festname)}</Text>
-              <TouchableOpacity onPress={() => navigate(item.id)}>
-                <Image 
-                  style={[styles.calendarIcon, styles.calendarIconLayout]}
-                  contentFit="cover"
-                  source={require("../../assets/Calendar.png")}
-                />
-              </TouchableOpacity>
-              <Text style={[styles.startDate20012024, styles.startTypo]}>
-  Start Date:{item.startdate ? new Date(item.startdate.seconds * 1000).toLocaleDateString() : ''}
-</Text>
-              <TouchableOpacity onPress={() => toggleEditModal(item)}>
-                <Text style={styles.editButton}>Edit</Text>
-              </TouchableOpacity>
-            </TouchableOpacity>
-          ))}
+        {data.map((item, index) => {
+  // Calculate the difference in milliseconds
+  const differenceInMs = item.startdate ? (item.startdate.seconds * 1000) - Date.now() : 0;
+  // Convert milliseconds to days
+  const differenceInDays = Math.ceil(differenceInMs / (1000 * 60 * 60 * 24));
+  // Display only if the difference is positive (i.e., the festival hasn't started yet)
+  return differenceInDays > 0 && (
+    <TouchableOpacity
+      key={index}
+      style={styles.createFestItem}
+      onLongPress={() => handleLongPress(item.id)} // Add long-press handler
+    >
+      <Text style={[styles.daysLeft, styles.daysTypo]}>{differenceInDays} Days left</Text>
+      <Text style={[styles.interfaces, styles.gatewaysTypo]}>{JSON.stringify(item.festname)}</Text>
+      <TouchableOpacity onPress={() => navigate(item.id)}>
+        <Image 
+          style={[styles.calendarIcon, styles.calendarIconLayout]}
+          contentFit="cover"
+          source={require("../../assets/Calendar.png")}
+        />
+      </TouchableOpacity>
+      <Text style={[styles.startDate20012024, styles.startTypo]}>
+        Start Date: {item.startdate ? new Date(item.startdate.seconds * 1000).toLocaleDateString() : ''}
+      </Text>
+      <TouchableOpacity onPress={() => toggleEditModal(item)}>
+        <Text style={styles.editButton}>Edit</Text>
+      </TouchableOpacity>
+    </TouchableOpacity>
+  );
+})}
           <View style={styles.wannaCreateA}>
             <Text style={styles.wannaCreate}>
               Wanna Create a New Fest, Click Here...

@@ -62,7 +62,9 @@ React.useEffect(() => {
   
   return (
     <View style={styles.eventDetails}>
-      <Text style={[styles.itManager, styles.itManagerTypo]}>IT Manager</Text>
+      <Text style={[styles.itManager, styles.itManagerTypo]}>
+  {events ? events.eventname : "No event available"}
+</Text>
       <Text style={[styles.monitorProgress, styles.itManagerTypo]}>
         Monitor Progress
       </Text>
@@ -127,9 +129,9 @@ React.useEffect(() => {
       />
       <Text
         style={[styles.feb2024Sunday, styles.calendarIconPosition]}
-      >{`28   FEB 
+      >{`19   APR 
  2024
-Sunday`}</Text>
+Friday`}</Text>
       
       <Image
         style={styles.maleUserIcon}
