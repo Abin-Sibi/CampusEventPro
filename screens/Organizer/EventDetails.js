@@ -130,13 +130,6 @@ React.useEffect(() => {
       >{`28   FEB 
  2024
 Sunday`}</Text>
-<TouchableOpacity onPress={()=>{navigation.navigate('Organizereventnotification')}}>
-  <Image
-        style={styles.unreadMessagesIcon}
-        contentFit="cover"
-        source={require("../../assets/Unread messages.png")}
-      />
-</TouchableOpacity>
       
       <Image
         style={styles.maleUserIcon}
@@ -179,7 +172,7 @@ progressText: {
   tasksLayout: {
     height: 54,
     width: 274,
-    left: 103,
+    left: 113,
     textAlign: "left",
     color: Color.colorWhite,
     fontFamily: FontFamily.irishGroverRegular,
@@ -288,9 +281,11 @@ progressText: {
   eventDetails: {
     backgroundColor: Color.colorDarkslateblue_200,
     flex: 1,
+
     width: "100%",
     height: 852,
     overflow: "hidden",
+    paddingLeft:15
   },
 });
 

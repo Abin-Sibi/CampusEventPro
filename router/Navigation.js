@@ -5,16 +5,14 @@ import AddEvent from '../screens/Organizer/AddEvent';
 import Addeventform from '../screens/Organizer/Addeventform';
 import FestDetails from '../screens/Organizer/FestDetails';
 
-import Committee from '../screens/Organizer/Committee';
 import AddCommitteeForm from '../screens/Organizer/AddCommitteeForm';
 import CommitteeDetails from '../screens/Organizer/CommitteDetails';
-import OrganizerCommitteTask from '../screens/Organizer/OrganizerCommitteTask';
 
 
 import EventDetails from '../screens/Organizer/EventDetails';
 import AddTeammembers from '../screens/Organizer/AddTeammembers';
 import CreateFest from '../screens/Organizer/CreateFest';
-import CreateFestForm from '../screens/Organizer/CreateFestForm';
+// import CreateFestForm from '../screens/Organizer/CreateFestForm';
 import Organizereventnotification from '../screens/Organizer/Organizereventnotification';
 import Organizereventeaddtask from '../screens/Organizer/Organizereventeaddtask';
 import Organizereventcompletedtask from '../screens/Organizer/Organizereventcompletedtask';
@@ -55,14 +53,9 @@ import Eventmenbercontactdeatils from '../screens/EventMembers/Eventmenbercontac
 import Others from '../screens/PublicScreens/Others';
 import Organizercommittecompletedtask from '../screens/Organizer/Organizercommittecompletedtask';
 import CommitteheadCommittememberdetails from '../screens/CommitteeHead/CommitteheadCommittememberdetails';
-
-
-
-
-
+import EditEventForm from '../screens/Organizer/EditEventForm';
 
 const Stack = createStackNavigator();
-
 
 function Navigation() {
     return (
@@ -71,15 +64,13 @@ function Navigation() {
             <Stack.Screen name="HomePage" component={HomePage} />
             <Stack.Screen name="AdminLogin" component={AdminLogin} />
             <Stack.Screen name="CreateFest" component={CreateFest} />
-            <Stack.Screen name="CreateFestForm" component={CreateFestForm} />
+            <Stack.Screen name="EditEventForm" component={EditEventForm} />
             <Stack.Screen name="FestDetails" component={FestDetails} />
             <Stack.Screen name="AddEvent" component={AddEvent} />
             <Stack.Screen name="Addeventform" component={Addeventform} />
             <Stack.Screen name="EventDetails" component={EventDetails} />
-            <Stack.Screen name="Committee" component={Committee} />
             <Stack.Screen name="AddCommitteeForm" component={AddCommitteeForm} />
             <Stack.Screen name="CommitteeDetails" component={CommitteeDetails} />
-            <Stack.Screen name="OrganizerCommitteTask" component={OrganizerCommitteTask} />
             <Stack.Screen name="Organizereventnotification" component={Organizereventnotification} />
             <Stack.Screen name="Organizereventeaddtask" component={Organizereventeaddtask} />
             <Stack.Screen name="Organizereventcompletedtask" component={Organizereventcompletedtask} />

@@ -1,18 +1,17 @@
-import * as React from "react";
-import { Text, StyleSheet, View, TouchableOpacity } from "react-native";
+import React, { useState, useEffect } from "react";
+import { Text, StyleSheet, View, TouchableOpacity, Alert, Modal, TextInput, Button } from "react-native";
 import { Image } from "expo-image";
 import { Color, Border, FontSize, FontFamily } from "../../GlobalStyles";
 import { useIsFocused, useNavigation, useRoute } from "@react-navigation/native";
-import { firebase } from '../../firebaseConfig'
+import { firebase } from '../../firebaseConfig';
 
 const AddCommitte = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { id } = route.params;
-  console.log(id, "hwllooooaaee")
   const isFocused = useIsFocused();
 
-  const [data, setData] = React.useState([]);
+  const [data, setData] = useState({ committees: [] });
 
   const fetchDataById = async () => {
     try {
@@ -21,32 +20,129 @@ const AddCommitte = () => {
       const doc = await documentRef.get();
       
       if (doc.exists) {
-        // Document found, extract its data
         const documentData = { id: doc.id, ...doc.data() };
-        console.log("Document data:", documentData);
         setData(documentData);
       } else {
         console.log("Document not found");
-        return null;
       }  
     } catch (error) {
       console.error("Error fetching document:", error);
-      return null;
     }
   };
-  React.useEffect(() => {
+
+  const deleteCommittee = async (committeeId) => {
+    try {
+      const db = firebase.firestore();
+      const documentRef = db.collection('festData').doc(id);
+      const doc = await documentRef.get();
+      
+      if (doc.exists) {
+        const committees = doc.data().committees || [];
+        const updatedCommittees = committees.filter(committee => committee.code !== committeeId);
+        
+        await documentRef.update({ committees: updatedCommittees });
+        
+        fetchDataById();
+      } else {
+        console.log("Document not found");
+      }  
+    } catch (error) {
+      console.error("Error deleting committee:", error);
+    }
+  };
+  
+  useEffect(() => {
     if (isFocused) {
       fetchDataById();
     }
-  }, [isFocused])
+  }, [isFocused]);
+
+  const handleDelete = (committeeId) => {
+    Alert.alert(
+      "Confirm Delete",
+      "Are you sure you want to delete this committee?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "OK",
+          onPress: () => deleteCommittee(committeeId)
+        }
+      ]
+    );
+  };
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editedCommitteeData, setEditedCommitteeData] = useState(null);
+  const [formData, setFormData] = useState({
+    committeename: "",
+    committeeheadname: "",
+    email: "",
+    password: "",
+    headcourse: "",
+    phone: "",
+  });
+
+  const handleEdit = (committee) => {
+    setEditedCommitteeData(committee);
+    setFormData({
+      committeename: committee.committeename,
+      committeeheadname: committee.committeeheadname,
+      // Set other form field values here
+      email: committee.email,
+    password: committee.password,
+    headcourse: committee.headcourse,
+    phone: committee.phone
+    });
+    setModalVisible(true);
+  };
+
+  const handleSubmitEditedCommittee = async () => {
+    try {
+      const db = firebase.firestore();
+      const documentRef = db.collection('festData').doc(id);
+      const doc = await documentRef.get();
+  
+      if (doc.exists) {
+        const committees = doc.data().committees || [];
+        const updatedCommittees = committees.map(committee => {
+          if (committee.code === editedCommitteeData.code) {
+            return { ...committee, ...formData }; // Update the edited committee with new form data
+          }
+          return committee;
+        });
+  
+        await documentRef.update({ committees: updatedCommittees });
+  
+        fetchDataById();
+        setModalVisible(false); // Close the modal after successful update
+      } else {
+        console.log("Document not found");
+      }
+    } catch (error) {
+      console.error("Error updating committee:", error);
+    }
+  };
+
   return (
     <View style={styles.addevent}>
       <Text style={styles.eventsConnect}>Commitee Connect</Text>
-          {data.committees && data.committees.map((committee, eventIndex) => (
-            <View key={eventIndex} style={[styles.addeventChild, styles.addeventShadowBox]} >
+      {data.committees && data.committees.length > 0 ? (
+        data.committees.map((committee, index) => (
+          <TouchableOpacity 
+            key={index} 
+            style={styles.touchableCommittee} // Add this style
+            onLongPress={() => handleDelete(committee.code)}
+          >
+            <View style={[styles.addeventChild, styles.addeventShadowBox]} >
               <Text style={[styles.itManagerEvent, styles.itManagerEventTypo]}>{committee.committeename}</Text>
-              <Text style={[styles.itManagerEvent1, styles.itManagerEventTypo]}>{committee.committeehead}</Text>
-              <TouchableOpacity onPress={() => { navigation.navigate('CommitteeDetails',{committees:{id:id,committeename:committee.committeename}}) }}>
+              <Text style={[styles.itManagerEvent1, styles.itManagerEventTypo]}>{committee.committeeheadname}</Text>
+              <TouchableOpacity style={styles.editButton} onPress={() => handleEdit(committee)}>
+           <Text style={styles.editButtonText}>Edit</Text>
+         </TouchableOpacity>
+              <TouchableOpacity onPress={() => { navigation.navigate('CommitteeDetails',{committees:{id:id,committeename:committee.committeename,committeecode:committee.code}}) }}>
                 <Image  
                   style={[styles.businessmanIcon, styles.iconLayout]}
                   contentFit="cover"
@@ -54,24 +150,76 @@ const AddCommitte = () => {
                 />
               </TouchableOpacity>
             </View>
-          ))}
-
+          </TouchableOpacity>
+        ))
+      ) : (
+        <Text>No committees available</Text>
+      )}
       <Image
         style={[styles.maleUserIcon, styles.iconLayout]}
         contentFit="cover"
         source={require("../../assets/Male User.png")}
       />
       <View style={styles.duplicateIconView}>
-        <TouchableOpacity onPress={() => { navigation.navigate('AddCommitteeForm', { id }) }}>
-        <Image
-          style={styles.duplicateIcon}
-          contentFit="cover"
-          source={require("../../assets/Duplicate.png")}
-        />
-      </TouchableOpacity>
+      <TouchableOpacity onPress={() => { navigation.navigate('AddCommitteeForm', { id }) }}>
+          <Image
+            style={styles.duplicateIcon}
+            contentFit="cover"
+            source={require("../../assets/Duplicate.png")}
+          />
+        </TouchableOpacity>
       </View>
-      
-
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Edit Commitee</Text>
+            <TextInput
+              style={styles.inputField}
+              placeholder="Event Name"
+              value={formData.committeename}
+              onChangeText={(text) => setFormData({...formData, committeename: text})}
+            />
+            <TextInput
+              style={styles.inputField}
+              placeholder="Event Head"
+              value={formData.committeeheadname}
+              onChangeText={(text) => setFormData({...formData, committeeheadname: text})}
+            />
+            <TextInput
+              style={styles.inputField}
+              placeholder="Email"
+              value={formData.email}
+              onChangeText={(text) => setFormData({...formData, email: text})}
+            />
+            <TextInput
+              style={styles.inputField}
+              placeholder="Password"
+              secureTextEntry
+              value={formData.password}
+              onChangeText={(text) => setFormData({...formData, password: text})}
+            />
+            <TextInput
+              style={styles.inputField}
+              placeholder="Head Course Name"
+              value={formData.headcourse}
+              onChangeText={(text) => setFormData({...formData, headcourse: text})}
+            />
+            <TextInput
+              style={styles.inputField}
+              placeholder="Phone No"
+              value={formData.phone}
+              onChangeText={(text) => setFormData({...formData, phone: text})}
+            />
+            <Button title="Submit" onPress={handleSubmitEditedCommittee} />
+            <Button title="Cancel" onPress={() => setModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -96,6 +244,38 @@ const styles = StyleSheet.create({
     backgroundColor: Color.colorDarkslateblue_100,
     borderRadius: Border.br_6xl,
   },
+  editButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: Color.colorDarkslateblue_300,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: Border.br_6xl,
+  },
+  editButtonText: {
+    color: Color.colorWhite,
+    fontSize: FontSize.size_3xl,
+    fontFamily: FontFamily.irishGroverRegular,
+  },
+
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    width: "80%",
+  },
+  touchableCommittee: {
+    width: "100%",
+    top:100,
+    marginTop:10, // Add border color
+  },
   itManagerEventTypo: {
     height: 110,
     width: 234,
@@ -114,16 +294,13 @@ const styles = StyleSheet.create({
   eventsConnect: {
     top: 39,
     left: 20,
-    fontSize: FontSize.size_21xl,
+    fontSize: FontSize.size_16xl,
     width: 396,
     height: 45,
     textAlign: "left",
     color: Color.colorWhite,
     fontFamily: FontFamily.irishGroverRegular,
     position: "absolute",
-  },
-  addeventChild: {
-    top: 108,
   },
   itManagerEvent: {
     top: 66,
@@ -139,9 +316,7 @@ const styles = StyleSheet.create({
     top: 18,
     left: 303,
   },
-  
   duplicateIcon: {
-    
     width: 56,
     height: 40,
     position:"absolute"

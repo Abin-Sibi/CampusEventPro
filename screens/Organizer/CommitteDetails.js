@@ -22,7 +22,7 @@ const CommitteeDetails = () => {
             const committeesData = committeeData.committees;
 
             // Filter events based on event name
-            const filteredCommittee = committeesData.find(committee => committee.eventname === committees.eventname);
+            const filteredCommittee = committeesData.find(committee => committee.committeename === committees.committeename);
 
             if (filteredCommittee) {
               const totalTasks = filteredCommittee.tasks ? filteredCommittee.tasks.length : 0;
@@ -136,19 +136,8 @@ React.useEffect(() => {
       >{`28   FEB 
  2024
 Sunday`}</Text>
-<TouchableOpacity onPress={()=>{navigation.navigate('Organizereventnotification')}}>
-  <Image
-        style={styles.unreadMessagesIcon}
-        contentFit="cover"
-        source={require("../../assets/Unread messages.png")}
-      />
-</TouchableOpacity>
       
-      <Image
-        style={styles.maleUserIcon}
-        contentFit="cover"
-        source={require("../../assets/Male User.png")}
-      />
+      
      
     </View>
   );
@@ -186,7 +175,7 @@ progressText: {
   tasksLayout: {
     height: 54,
     width: 274,
-    left: 103,
+    left: 113,
     textAlign: "left",
     color: Color.colorWhite,
     fontFamily: FontFamily.irishGroverRegular,
@@ -312,7 +301,7 @@ progressText: {
     position: "absolute",
   },
   groupOfCompanies: {
-    top: 31,
+    top: 51,
     left: 293,
     width: 90,
     height: 90,
@@ -325,6 +314,7 @@ progressText: {
     width: "100%",
     height: 852,
     overflow: "hidden",
+    padding:10
   },
 });
 

@@ -1,67 +1,123 @@
 import * as React from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import { Image } from "expo-image";
 import { Color, Border, FontFamily, FontSize } from "../../GlobalStyles";
 import { useRoute } from "@react-navigation/native";
-import { firebase } from '../../firebaseConfig'
+import { firebase } from '../../firebaseConfig';
 
 const Eventheadpendingtask = () => {
   const route = useRoute();
   const { eventdata } = route.params;
-  console.log(eventdata)
   const [pendingTasks, setPendingTasks] = React.useState([]);
+  const [loading, setLoading] = React.useState(true); // Loading state
+  const [abin,setAbin]= React.useState([]);
+
   const fetchPendingTasks = async () => {
     try {
-        const db = firebase.firestore();
-        const festRef = db.collection('festData');
+      const db = firebase.firestore();
+      const festRef = db.collection('festData');
+      const docSnapshot = await festRef.get();
+      const pendingTasks = [];
 
-        // Get the document snapshot
-        const docSnapshot = await festRef.get();
-
-        // Array to store pending tasks
-        const pendingTasks = [];
-
-        // Iterate through the documents
-        docSnapshot.forEach(doc => {
-            const events = doc.data().events;
-
-            if (events && events.length > 0) {
-                // Iterate through the events array
-                events.forEach(event => {
-                    if (event.tasks && event.tasks.length > 0 && event.code === eventdata.eventcode) {
-                        // Iterate through the tasks array of the event
-                        event.tasks.forEach(task => {
-                            // Check if the task status is pending
-                            if (task.status === 'pending') {
-                                // Add the task to the pendingTasks array
-                                pendingTasks.push({
-                                    eventId: doc.id,
-                                    eventName: event.eventname,
-                                    taskData: task
-                                });
-                            }
-                        });
-                    }
-                });
+      docSnapshot.forEach(doc => {
+        const events = doc.data().events;
+        console.log("oooooooooo",doc.data())
+setAbin(events)
+        if (events && events.length > 0) {
+          events.forEach(event => {
+            if (event.tasks && event.tasks.length > 0 && event.code === eventdata.eventcode) {
+              event.tasks.forEach(task => {
+                if (task.status === 'pending') {
+                  pendingTasks.push({
+                    eventId: doc.id,
+                    eventName: event.eventname,
+                    taskData: task
+                  });
+                }
+              });
             }
-        });
+          });
+        }
+      });
 
-        console.log('Pending tasks:', pendingTasks);
-        setPendingTasks(pendingTasks)
-        return pendingTasks;
+      setPendingTasks(pendingTasks);
+      setLoading(false); // Set loading to false after fetching tasks
+      return pendingTasks;
     } catch (error) {
-        console.error('Error fetching pending tasks:', error);
-        return [];
+      console.error('Error fetching pending tasks:', error);
+      setLoading(false); // Set loading to false in case of error
+      return [];
     }
-};
-React.useEffect(() => {
-  fetchPendingTasks();
-}, [])
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    try {
+      const db = firebase.firestore();
+      const festRef = db.collection('festData');
+      
+      const docSnapshot = await festRef.get();
+  
+      docSnapshot.forEach(doc => {
+        const events = doc.data().events;
+        console.log("jjjj",doc.data())
+        if (abin && abin.length > 0) {
+          abin.forEach(event => {
+            if (event.tasks && event.tasks.length > 0 && event.code === eventdata.eventcode) {
+              const updatedTasks = event.tasks.filter(task => task.taskname !== taskId);
+              event.tasks = updatedTasks;
+            }
+          });
+        }
+  
+        // Update the document with the modified events
+        db.collection('festData').doc(doc.id).update({ events: events });
+      });
+  
+      // Fetch updated pending tasks
+      fetchPendingTasks();
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    }
+  };
+
+  React.useEffect(() => {
+    const fetchEvents = async () => {
+      await fetchPendingTasks();
+     
+    };
+    fetchEvents();
+  }, []);
+
+  const handleLongPress = (taskId) => {
+    Alert.alert(
+      "Confirm Delete",
+      "Are you sure you want to delete this task?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "OK",
+          onPress: () => handleDeleteTask(taskId)
+        }
+      ]
+    );
+  };
+
+  if (loading) {
+    return <ActivityIndicator style={styles.loadingIndicator} size="large" color={Color.colorDarkslateblue_100} />;
+  }
+
   return (
     <View style={styles.eventheadpendingtask}>
-      <View style={styles.eventheadpendingtaskChild} >
-      {pendingTasks.map((task,index)=>{
-          return(<View key={index} style={styles.card}>
+      <View style={styles.eventheadpendingtaskChild}>
+        {pendingTasks.map((task, index) => (
+          <TouchableOpacity
+            key={index}
+            onLongPress={() => handleLongPress(task.taskData.taskname)}
+            style={styles.card}
+          >
             <View style={styles.content}>
               <View style={styles.leftContent}>
                 <Text style={styles.taskName}>{task.taskData.taskname}</Text>
@@ -69,14 +125,13 @@ React.useEffect(() => {
               </View>
               <View style={styles.rightContent}>
                 <Text style={styles.status}>{task.taskData.status}</Text>
-                <Text style={styles.status}>{task.taskData.duedate}</Text>
+                <Text style={styles.status}>{new Date(task.taskData.duedate.seconds * 1000).toLocaleDateString()}</Text>
               </View>
             </View>
-          </View>)
-          
-        })}
+          </TouchableOpacity>
+        ))}
       </View>
-      
+
       <Text style={[styles.pendingTasks, styles.taskFlexBox]}>
         Pending tasks
       </Text>
@@ -90,6 +145,11 @@ React.useEffect(() => {
 };
 
 const styles = StyleSheet.create({
+  loadingIndicator: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   card: {
     backgroundColor: Color.colorDarkslateblue_100,
     borderRadius: 8,

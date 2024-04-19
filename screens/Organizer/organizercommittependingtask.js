@@ -1,14 +1,13 @@
-import * as React from "react";
-import { Text, StyleSheet, View } from "react-native";
+import React from "react";
+import { Text, StyleSheet, View, TouchableOpacity, Alert } from "react-native";
 import { Image } from "expo-image";
 import { Color, FontFamily, FontSize, Border } from "../../GlobalStyles";
 import { useRoute } from "@react-navigation/native";
-import { firebase } from '../../firebaseConfig'
+import { firebase } from '../../firebaseConfig';
 
 const Organizercommittependingtask = () => {
   const route = useRoute();
   const { committees } = route.params;
-  console.log(committees,"rrrr")
   const [pendingTasks, setPendingTasks] = React.useState([]);
 
   const fetchDataById = async () => {
@@ -18,46 +17,94 @@ const Organizercommittependingtask = () => {
       const doc = await documentRef.get();
       
       if (doc.exists) {
-        // Document found, extract its data
         const documentData = { id: doc.id, ...doc.data() };
-        console.log("Document data:", documentData);
-
         if (documentData) {
-          // Find the event within the festival by event name
           const committee = documentData.committees.find(committee => committee.committeename === committees.committeename);
-      
           if (committee) {
-            // Filter the tasks of the event to get only pending tasks
             const pendingTasks = committee.tasks.filter(task => task.status === "pending");
-            console.log("this it the pendihng taks",pendingTasks)
-            setPendingTasks(pendingTasks)
+            setPendingTasks(pendingTasks);
           } else {
             console.log("Event not found");
-            return [];
           }
         } else {
           console.log("Festival not found");
-          return [];
         }
       } else {
         console.log("Document not found");
-        return null;
       }  
     } catch (error) {
       console.error("Error fetching document:", error);
-      return null;
     }
   };
 
   React.useEffect(() => {
-      fetchDataById();
-  }, [])
+    fetchDataById();
+  }, []);
+
+  const handleDeleteTask = async (taskId) => {
+    try {
+      const db = firebase.firestore();
+      const documentRef = db.collection('festData').doc(committees.id);
+      const doc = await documentRef.get();
+      
+      if (doc.exists) {
+        const committeeData = doc.data();
+        if (committeeData.committees && Array.isArray(committeeData.committees)) {
+          const updatedCommittees = committeeData.committees.map(committee => {
+            // Find the committee that matches the committee code
+            if (committee.code === committees.committeecode) {
+              // Filter out the task with the specified taskId
+              const updatedTasks = committee.tasks.filter(task => task.taskname !== taskId);
+              // Return the committee object with updated tasks
+              return { ...committee, tasks: updatedTasks };
+            }
+            return committee; // Return unchanged if not the target committee
+          });
+  
+          // Update the document with the updated committees array
+          await documentRef.update({ committees: updatedCommittees });
+  
+          // Refresh the tasks after deletion
+          fetchDataById();
+        } else {
+          console.log("Committees field is not an array or is undefined");
+        }
+      } else {
+        console.log("Document not found");
+      }
+    } catch (error) {
+      console.error("Error deleting task:", error);
+    }
+  };
+  
+  
+  const handleLongPress = (taskId) => {
+    Alert.alert(
+      "Confirm Delete",
+      "Are you sure you want to delete this task?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "OK",
+          onPress: () => handleDeleteTask(taskId)
+        }
+      ] 
+    );
+  };
+
   return (
     <View style={styles.organizeeventependingtask}>
       <Text style={styles.pendingTasks}>Pending tasks</Text>
-      <View style={styles.organizeeventependingtaskChild} >
-        {pendingTasks.map((task,index)=>{
-          return(<View key={index} style={styles.card}>
+      <View style={styles.organizeeventependingtaskChild}>
+        {pendingTasks.map((task, index) => (
+          <TouchableOpacity
+            key={index}
+            onLongPress={() => handleLongPress(task.taskname)} // Handle long press
+            style={styles.card}
+          >
             <View style={styles.content}>
               <View style={styles.leftContent}>
                 <Text style={styles.taskName}>{task.taskname}</Text>
@@ -65,22 +112,17 @@ const Organizercommittependingtask = () => {
               </View>
               <View style={styles.rightContent}>
                 <Text style={styles.status}>{task.status}</Text>
-                <Text style={styles.status}>{task.duedate}</Text>
+                <Text style={styles.status}>{new Date(task.duedate.seconds * 1000).toLocaleDateString()}</Text>
               </View>
             </View>
-          </View>)
-          
-        })}
-      
+          </TouchableOpacity>
+        ))}
       </View>
-      
-      
       <Image
         style={styles.tasksIcon}
         contentFit="cover"
         source={require("../../assets/Tasks.png")}
       />
-      
     </View>
   );
 };
@@ -126,8 +168,8 @@ const styles = StyleSheet.create({
     color:Color.colorWhite
   },
   pendingTasks: {
-    top: 45,
-    fontSize: FontSize.size_13xl,
+    top: 55,
+    fontSize: FontSize.size_5xl,
     fontFamily: FontFamily.irishGroverRegular,
     width: 274,
     height: 54,

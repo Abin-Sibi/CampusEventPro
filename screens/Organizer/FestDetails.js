@@ -42,7 +42,7 @@ const FestDetails = () => {
 const styles = StyleSheet.create({
   eventsTypo: {
     height: 44,
-    width: 106,
+    width: 130,
     textAlign: "left",
     color: Color.colorWhite,
     fontFamily: FontFamily.irishGroverRegular,
@@ -99,11 +99,11 @@ const styles = StyleSheet.create({
   },
   committe: {
     top: 625,
-    left: 277,
+    left: 267,
   },
   events: {
     top: 624,
-    left: 30,
+    left: 35,
   },
   userIcon: {
     top: 25,

@@ -69,7 +69,7 @@ React.useEffect(() => {
               </View>
               <View style={styles.rightContent}>
                 <Text style={styles.status}>{task.taskData.status}</Text>
-                <Text style={styles.status}>{task.taskData.duedate}</Text>
+                <Text style={styles.status}>{new Date(task.taskData.duedate.seconds * 1000).toLocaleDateString()}</Text>
               </View>
             </View>
           </View>)

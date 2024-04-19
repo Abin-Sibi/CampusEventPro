@@ -54,7 +54,7 @@ const Organizereventcompletedtask = () => {
   }, [])
   return (
     <View style={styles.organizeeventependingtask}>
-      <Text style={styles.pendingTasks}>Pending tasks</Text>
+      <Text style={styles.pendingTasks}>Completed tasks</Text>
       <View style={styles.organizeeventependingtaskChild} >
         {pendingTasks.map((task,index)=>{
           return(<View key={index} style={styles.card}>
@@ -65,7 +65,7 @@ const Organizereventcompletedtask = () => {
               </View>
               <View style={styles.rightContent}>
                 <Text style={styles.status}>{task.status}</Text>
-                <Text style={styles.status}>{task.duedate}</Text>
+                <Text style={styles.status}>{new Date(task.duedate.seconds * 1000).toLocaleDateString()}</Text>
               </View>
             </View>
           </View>)
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   },
   pendingTasks: {
     top: 45,
-    fontSize: FontSize.size_13xl,
+    fontSize: FontSize.size_5xl,
     fontFamily: FontFamily.irishGroverRegular,
     width: 274,
     height: 54,
